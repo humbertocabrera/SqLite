@@ -1,8 +1,8 @@
 package com.example.clase05persistenciadatossqlite.modelos
 
-data class Juego (
+data class Anime (
     var id: Int,
     var nombre: String,
-    var precio: Float,
-    var consola: String
+    var demo: String,
+    var rating: String
 )

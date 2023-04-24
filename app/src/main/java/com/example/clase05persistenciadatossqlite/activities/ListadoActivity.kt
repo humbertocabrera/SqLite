@@ -10,23 +10,24 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.view.Menu
-import android.widget.ListView
 import android.widget.SearchView
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.clase05persistenciadatossqlite.R
-import com.example.clase05persistenciadatossqlite.adapters.JuegosAdapter
+import com.example.clase05persistenciadatossqlite.adapters.AnimesAdapter
 import com.example.clase05persistenciadatossqlite.db.ManejadorBaseDatos
-import com.example.clase05persistenciadatossqlite.interfaces.juegosInterface
-import com.example.clase05persistenciadatossqlite.modelos.Juego
+import com.example.clase05persistenciadatossqlite.interfaces.animesInterface
+import com.example.clase05persistenciadatossqlite.modelos.Anime
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class ListadoActivity : AppCompatActivity(), juegosInterface {
+class ListadoActivity : AppCompatActivity(), animesInterface {
 
-    private lateinit var listView: ListView
-    private var listaDeJuegos = ArrayList<Juego>()
+    private lateinit var recyclerView: RecyclerView
+    private var listaDeAnimes = ArrayList<Anime>()
     private lateinit var fab: FloatingActionButton
     private val ORDENAR_POR_NOMBRE : String  = "nombre"
-    val columnas = arrayOf("id", "nombre","precio", "consola" )
+    val columnas = arrayOf("id", "nombre","demo", "rating" )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_listado)
@@ -35,10 +36,10 @@ class ListadoActivity : AppCompatActivity(), juegosInterface {
     }
     override fun onResume() {
         super.onResume()
-        traerMisJuegos()
+        traerMisAnimes()
     }
     private fun inicializarVistas(){
-        listView = findViewById(R.id.listView)
+        recyclerView = findViewById(R.id.recycler)
         fab = findViewById(R.id.fab)
     }
 
@@ -56,7 +57,7 @@ class ListadoActivity : AppCompatActivity(), juegosInterface {
         searchView.setSearchableInfo(manejador.getSearchableInfo(componentName))
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String?): Boolean {
-                buscarJuego("%" + p0 + "%")
+                buscarAnime("%" + p0 + "%")
                 Toast.makeText(applicationContext, p0, Toast.LENGTH_SHORT).show()
                 return false
             }
@@ -74,7 +75,7 @@ class ListadoActivity : AppCompatActivity(), juegosInterface {
     }
 
 
-    private fun traerMisJuegos() {
+    private fun traerMisAnimes() {
         val baseDatos = ManejadorBaseDatos(this)
         val cursor = baseDatos.traerTodos(columnas, ORDENAR_POR_NOMBRE)
         recorrerResultados( cursor)
@@ -82,7 +83,7 @@ class ListadoActivity : AppCompatActivity(), juegosInterface {
     }
 
     @SuppressLint("Range")
-    private fun buscarJuego(nombre: String) {
+    private fun buscarAnime(nombre: String) {
         val baseDatos = ManejadorBaseDatos(this)
         val camposATraer = arrayOf(nombre)
         val cursor = baseDatos.seleccionar(columnas,"nombre like ?", camposATraer, ORDENAR_POR_NOMBRE)
@@ -92,36 +93,43 @@ class ListadoActivity : AppCompatActivity(), juegosInterface {
 
     @SuppressLint("Range")
     fun recorrerResultados(cursor : Cursor){
-        if(listaDeJuegos.size > 0)
-            listaDeJuegos.clear()
+        if(listaDeAnimes.size > 0)
+            listaDeAnimes.clear()
 
         if(cursor.moveToFirst()){
             do{
-                val juego_id = cursor.getInt(cursor.getColumnIndex("id"))
+                val anime_id = cursor.getInt(cursor.getColumnIndex("id"))
                 val nombre = cursor.getString(cursor.getColumnIndex("nombre"))
-                val precio = cursor.getFloat(cursor.getColumnIndex("precio"))
-                val consola = cursor.getString(cursor.getColumnIndex("consola"))
-                val juego: Juego
-                juego = Juego(juego_id, nombre, precio, consola)
-                listaDeJuegos.add(juego)
+                val demo = cursor.getString(cursor.getColumnIndex("demo"))
+                val rating = cursor.getString(cursor.getColumnIndex("rating"))
+                val anime: Anime
+                anime = Anime(anime_id, nombre, demo, rating)
+                listaDeAnimes.add(anime)
             }while(cursor.moveToNext())
         }
-        val adapter: JuegosAdapter = JuegosAdapter(this, listaDeJuegos,this)
-        listView.adapter = adapter
+        val linearLayoutManager = LinearLayoutManager(
+            this,
+            LinearLayoutManager.VERTICAL, false
+        )
+
+        recyclerView.layoutManager = linearLayoutManager
+
+        val adapter = AnimesAdapter(this, listaDeAnimes,this)
+        recyclerView.adapter = adapter
 
     }
 
-    override fun juegoEliminado() {
-        Log.d("PRUEBAS", "juegoEliminado")
-        traerMisJuegos()
+    override fun animeEliminado() {
+        Log.d("PRUEBAS", "animeEliminado")
+        traerMisAnimes()
     }
 
-    override fun editarJuego(juego: Juego) {
-        Log.d("PRUEBAS", "editar Juego "+juego.id)
+    override fun editarAnime(anime: Anime) {
+        Log.d("PRUEBAS", "editar Anime "+anime.id)
         val intent = Intent(this, EditarActivity::class.java)
-        intent.putExtra("id",juego.id)
-        intent.putExtra("nombre",juego.nombre)
-        intent.putExtra("consola",juego.consola)
+        intent.putExtra("id",anime.id)
+        intent.putExtra("nombre",anime.nombre)
+        intent.putExtra("rating",anime.rating)
         startActivity(intent)
     }
 

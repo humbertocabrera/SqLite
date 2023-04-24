@@ -18,75 +18,73 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.example.clase05persistenciadatossqlite.R
 import com.example.clase05persistenciadatossqlite.db.ManejadorBaseDatos
-import com.example.clase05persistenciadatossqlite.modelos.Juego
+import com.example.clase05persistenciadatossqlite.modelos.Anime
 import com.google.android.material.snackbar.Snackbar
 
 class EditarActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private lateinit var bnGuardar: Button
-    private lateinit var etJuego: EditText
-    private lateinit var etPrecio: EditText
-    private lateinit var spConsola: Spinner
-    private val consolas = arrayOf("Xbox", "Nintendo", "Playstation", "MultiPlataforma", "P.C")
-    private var consolaSeleccionada: String = ""
-    private lateinit var tvJuego: TextView
-    var juego: Juego? = null
+    private lateinit var etAnimeEdit: EditText
+    private lateinit var etDemoEdit: EditText
+    private lateinit var spRatingEdit: Spinner
+    private val ratings = arrayOf("10", "9", "8", "7", "6", "5", "4", "3", "2", "1")
+    private var ratingSeleccionado: String = ""
+    private lateinit var tvAnimeEdit: TextView
+    var anime: Anime? = null
     var id: Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_editar)
         //  setSupportActionBar(toolbar)
-        getSupportActionBar()?.title = "Edición"
-        getSupportActionBar()?.setHomeButtonEnabled(true);
-        getSupportActionBar()?.setDisplayHomeAsUpEnabled(true);
+        supportActionBar?.title = "Edición"
+        supportActionBar?.setHomeButtonEnabled(true);
+        supportActionBar?.setDisplayHomeAsUpEnabled(true);
         inicializarVistas()
         id = intent.getIntExtra("id", 0)
-        buscarJuego(id)
+        buscarAnime(id)
         poblarCampos()
     }
 
     private fun poblarCampos() {
-        etJuego.setText(juego?.nombre)
-        etPrecio.setText(juego?.precio.toString())
-        val position = consolas.indexOf(juego?.consola)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, consolas)
+        etAnimeEdit.setText(anime?.nombre)
+        etDemoEdit.setText(anime?.demo.toString())
+        val position = ratings.indexOf(anime?.rating)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, ratings)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spConsola.adapter = adapter
-        spConsola.onItemSelectedListener = this
+        spRatingEdit.adapter = adapter
+        spRatingEdit.onItemSelectedListener = this
         if (position >= 0) {
-            spConsola.setSelection(position)
-            consolaSeleccionada = consolas[position]
+            spRatingEdit.setSelection(position)
+            ratingSeleccionado = ratings[position]
         }
     }
 
     private fun inicializarVistas() {
-        etJuego = findViewById(R.id.etJuego)
+        etAnimeEdit = findViewById(R.id.etAnimeEdit)
         bnGuardar = findViewById(R.id.bnGuardar)
-        etPrecio = findViewById(R.id.etPrecio)
-        spConsola = findViewById(R.id.spConsola)
-        tvJuego = findViewById(R.id.tvJuego)
+        etDemoEdit = findViewById(R.id.etDemoEdit)
+        spRatingEdit = findViewById(R.id.spRatingEdit)
+        tvAnimeEdit = findViewById(R.id.tvAnimeEdit)
         bnGuardar.setOnClickListener {
-            var precio_actual: Float
-            precio_actual = etPrecio.text.toString().toFloat()
-            actualizarJuego(etJuego.text.toString(), precio_actual, consolaSeleccionada)
+            actualizarAnime(etAnimeEdit.text.toString(), etDemoEdit.text.toString(), ratingSeleccionado)
         }
     }
 
-    val columnaNombreJuego = "nombre"
-    val columnaPrecio = "precio"
-    val columnaConsola = "consola"
+    val columnaNombreAnime = "nombre"
+    val columnaPrecio = "demo"
+    val columnaConsola = "rating"
 
-    private fun actualizarJuego(nombreJuego: String, precio: Float, consola: String) {
-        if (!TextUtils.isEmpty(consola)) {
+    private fun actualizarAnime(nombreAnime: String, demo: String, rating: String) {
+        if (!TextUtils.isEmpty(rating)) {
             val baseDatos = ManejadorBaseDatos(this)
             val contenido = ContentValues()
-            contenido.put(columnaNombreJuego, nombreJuego)
-            contenido.put(columnaPrecio, precio)
-            contenido.put(columnaConsola, consola)
+            contenido.put(columnaNombreAnime, nombreAnime)
+            contenido.put(columnaPrecio, demo)
+            contenido.put(columnaConsola, rating)
             if ( id > 0) {
                 val argumentosWhere = arrayOf(id.toString())
                 val id_actualizado = baseDatos.actualizar(contenido, "id = ?", argumentosWhere)
                 if (id_actualizado > 0) {
-                    Snackbar.make(etJuego, "Juego actualizado", Snackbar.LENGTH_LONG).show()
+                    Snackbar.make(etAnimeEdit, "Anime actualizado", Snackbar.LENGTH_LONG).show()
                 } else {
                     val alerta = AlertDialog.Builder(this)
                     alerta.setTitle("Atención")
@@ -112,23 +110,23 @@ class EditarActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     @SuppressLint("Range")
-    private fun buscarJuego(idJuego: Int) {
+    private fun buscarAnime(idAnime: Int) {
 
-        if (idJuego > 0) {
+        if (idAnime > 0) {
             val baseDatos = ManejadorBaseDatos(this)
-            val columnasATraer = arrayOf("id", "nombre", "precio", "consola")
+            val columnasATraer = arrayOf("id", "nombre", "demo", "rating")
             val condicion = " id = ?"
-            val argumentos = arrayOf(idJuego.toString())
+            val argumentos = arrayOf(idAnime.toString())
             val ordenarPor = "id"
             val cursor = baseDatos.seleccionar(columnasATraer, condicion, argumentos, ordenarPor)
 
             if (cursor.moveToFirst()) {
                 do {
-                    val juego_id = cursor.getInt(cursor.getColumnIndex("id"))
+                    val anime_id = cursor.getInt(cursor.getColumnIndex("id"))
                     val nombre = cursor.getString(cursor.getColumnIndex("nombre"))
-                    val precio = cursor.getFloat(cursor.getColumnIndex("precio"))
-                    val consola = cursor.getString(cursor.getColumnIndex("consola"))
-                    juego = Juego(juego_id, nombre, precio, consola)
+                    val demo = cursor.getString(cursor.getColumnIndex("demo"))
+                    val rating = cursor.getString(cursor.getColumnIndex("rating"))
+                    anime = Anime(anime_id, nombre, demo, rating)
                 } while (cursor.moveToNext())
             }
             baseDatos.cerrarConexion()
@@ -136,7 +134,7 @@ class EditarActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-        consolaSeleccionada = consolas[position]
+        ratingSeleccionado = ratings[position]
     }
 
     override fun onNothingSelected(p0: AdapterView<*>?) {

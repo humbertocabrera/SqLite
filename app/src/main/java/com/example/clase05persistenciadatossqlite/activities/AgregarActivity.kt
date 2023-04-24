@@ -19,63 +19,62 @@ import com.google.android.material.snackbar.Snackbar
 
 class AgregarActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private  lateinit var fabAgregar: FloatingActionButton
-    private  lateinit var etJuego: EditText
-    private  lateinit var etPrecio: EditText
-    private  lateinit var spConsola: Spinner
-    private val consolas = arrayOf("Xbox", "Nintendo", "Playstation", "MultiPlataforma", "P.C")
-    private var consolaSeleccionada: String = ""
+    private  lateinit var etAnime: EditText
+    private  lateinit var etDemo: EditText
+    private  lateinit var spRating: Spinner
+    private val ratings = arrayOf("10", "9", "8", "7", "6", "5", "4", "3", "2", "1")
+    private var ratingSeleccionado: String = ""
     private  lateinit var tvJuego: TextView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_agregar)
         inicializarVistas()
 
-        val adapter = ArrayAdapter(this,android.R.layout.simple_spinner_item, consolas)
+        val adapter = ArrayAdapter(this,android.R.layout.simple_spinner_item, ratings)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        spConsola.adapter = adapter
-        spConsola.onItemSelectedListener = this
+        spRating.adapter = adapter
+        spRating.onItemSelectedListener = this
         fabAgregar.setOnClickListener{
-            insertarJuego( etJuego.text.toString(),  etPrecio.text.toString().toFloat(),consolaSeleccionada)
+            insertarAnime( etAnime.text.toString(),  etDemo.text.toString(), ratingSeleccionado)
         }
     }
 
     val columnaID = "id"
-    val columnaNombreJuego = "nombre"
-    val columnaPrecio = "precio"
-    val columnaConsola = "consola"
+    val columnaNombreAnime = "nombre"
+    val columnaDemografia = "demo"
+    val columnaRating = "rating"
     var id: Int = 0
-    private fun insertarJuego(nombreJuego: String, precio: Float, consola: String){
-       if(!TextUtils.isEmpty(consola)) {
+    private fun insertarAnime(nombreAnime: String, demografia: String, rating: String){
+       if(!TextUtils.isEmpty(rating)) {
            val baseDatos = ManejadorBaseDatos(this)
            //  val columnas = arrayOf(columnaID, columnaNombreJuego, columnaPrecio, columnaConsola)
            val contenido = ContentValues()
-           contenido.put(columnaNombreJuego, nombreJuego)
-           contenido.put(columnaPrecio, precio)
-           contenido.put(columnaConsola, consola)
+           contenido.put(columnaNombreAnime, nombreAnime)
+           contenido.put(columnaDemografia, demografia)
+           contenido.put(columnaRating, rating)
            //guardar imagen
             id = baseDatos.insertar(contenido).toInt()
            if (id > 0) {
-               Toast.makeText(this, "juego " + nombreJuego + " agregado", Toast.LENGTH_LONG).show()
+               Toast.makeText(this,  nombreAnime + " agregado a la lista", Toast.LENGTH_LONG).show()
                finish()
            } else
-               Toast.makeText(this, "Ups no se pudo guardar el juego", Toast.LENGTH_LONG).show()
+               Toast.makeText(this, "Ups no se pudo guardar el anime", Toast.LENGTH_LONG).show()
            baseDatos.cerrarConexion()
        }else{
-           Snackbar.make(tvJuego,"Favor seleccionar una consola", 0).show()
+           Snackbar.make(tvJuego,"Favor seleccionar una calificación", 0).show()
        }
     }
 
     private fun inicializarVistas(){
-        etJuego = findViewById(R.id.etJuego)
+        etAnime = findViewById(R.id.etAnime)
         fabAgregar = findViewById(R.id.fabAgregar)
-        etPrecio = findViewById(R.id.etPrecio)
-        spConsola = findViewById(R.id.spConsola)
-        tvJuego = findViewById(R.id.tvJuego)
+        etDemo = findViewById(R.id.etDemo)
+        spRating = findViewById(R.id.spRating)
     }
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, id: Long) {
-        consolaSeleccionada = consolas[position]
+        ratingSeleccionado = ratings[position]
     }
 
     override fun onNothingSelected(p0: AdapterView<*>?) {

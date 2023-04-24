@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#5965CB"
     tools:context=".activities.ListadoActivity">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -11,16 +12,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
-        app:srcCompat="@android:drawable/ic_menu_add"
-        android:layout_margin="16dp" />
+        android:layout_margin="16dp"
+        app:srcCompat="@android:drawable/ic_menu_add" />
 
-    <ListView
-        android:padding="6dp"
-        tools:listitem="@layout/row_juego"
-        android:id="@+id/listView"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        tools:listitem="@layout/row_juego">
 
-    </ListView>
+    </androidx.recyclerview.widget.RecyclerView>
 
 </FrameLayout>
